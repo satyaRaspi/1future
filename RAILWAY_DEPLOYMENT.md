@@ -1,4 +1,4 @@
-# Railway Deployment Guide — Life Path Decoder v1.6.5
+# Railway Deployment Guide — Life Path Decoder v1.6.6
 
 This build is Railway-ready.
 
@@ -20,7 +20,7 @@ This build is Railway-ready.
 ```bat
 cd C:\99future
 git add .
-git commit -m "Deploy Life Path Decoder v1.6.5"
+git commit -m "Deploy Life Path Decoder v1.6.6"
 git push -u origin main
 ```
 
@@ -79,7 +79,7 @@ Expected version:
 ```
 
 
-## v1.6.5 note
+## v1.6.6 note
 
 Today’s Prediction uses Railway proxy headers such as X-Forwarded-For to locate the visitor approximately. If strict proxy settings are changed, the section will fall back to a generic UTC reading.
 
@@ -99,16 +99,20 @@ DISABLE_EXTERNAL_GEOCODING=true
 Keep `DISABLE_EXTERNAL_GEOCODING=true` if you want to avoid the legacy public geocoder and rely on Mapbox + offline fallback only.
 
 
-## v1.6.5 Selected Date Prediction
+## v1.6.6 Selected Date Prediction
 No new Railway variable is required. Deploy normally after pushing the updated code.
 
-## v1.6.5 Demo Data and Logo Upload Fix
+## v1.6.6 Demo Data and Logo Upload Fix
 - Demo data creation is more reliable on Railway with old persistent volumes/config rows.
 - Uploaded logos are saved into the Railway volume as smaller transparent PNGs under the configured data directory.
 
 
-## v1.6.5 Demo Data Button Reliability Fix
+## v1.6.6 Demo Data Button Reliability Fix
 
 - Demo data button refreshes the local session/CSRF token before creating data.
 - Demo creation sends JSON with same-origin credentials and retries once if the session token is stale.
 - Demo endpoint rate limit is relaxed for repeated local testing.
+
+## v1.6.6 Language Output Fix
+- No new Railway variable is required.
+- Language selection is handled locally in the app for Kannada, Hindi and Tamil.

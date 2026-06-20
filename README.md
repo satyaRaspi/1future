@@ -1,10 +1,10 @@
-# Life Path Decoder v1.6.5
+# Life Path Decoder v1.6.6
 
 A Railway-ready FastAPI web app that generates Life Path / South Indian style reflective reports from name, DOB, time of birth and birth place.
 
 > Important: This software is for reflection and entertainment. It is not scientific, psychological, medical, legal, financial, or deterministic advice.
 
-## v1.6.5 Premium & Commercial Readiness Release
+## v1.6.6 Premium & Commercial Readiness Release
 
 Added in this build:
 
@@ -105,7 +105,7 @@ Railway health check path:
 ```bat
 cd C:\99future
 git add .
-git commit -m "Life Path Decoder v1.6.5 premium readiness release"
+git commit -m "Life Path Decoder v1.6.6 premium readiness release"
 git push -u origin main
 ```
 
@@ -128,31 +128,31 @@ git push -u origin main
 - Full native-language report translation is represented by language preference capture; production translation can be connected in the next release.
 
 
-## v1.6.5 updates
+## v1.6.6 updates
 - Added South Indian methodology-inspired Trouble With Law / compliance caution section.
 - Added Create Demo Data button. Its visibility is controlled from Admin Settings.
 - Added public configuration endpoint for safe UI feature toggles.
 
 
-## v1.6.5 updates
+## v1.6.6 updates
 
 - Added Today’s Prediction section using approximate visitor IP location.
 - The reading uses local date/time, nakshatra, moon rashi, tithi and weekday ruler in a South Indian-style daily interpretation.
 - Added fallback handling when visitor IP location cannot be resolved.
 
 
-## v1.6.5 local reload fix
+## v1.6.6 local reload fix
 
 The local Mac/Linux and Windows run scripts now restrict Uvicorn reload watching to the `app/` folder only. This prevents WatchFiles from repeatedly restarting the server when files inside `.venv/` change.
 
 
-## v1.6.5 Mac layout stability fix
+## v1.6.6 Mac layout stability fix
 - Fixed mobile/tablet form layout cascade issue.
 - Preserved executable permission guidance for Mac/Linux run script.
 - Local reload watches only the app folder.
 
 
-## v1.6.5 Mac stable UI and service fix
+## v1.6.6 Mac stable UI and service fix
 
 - Main Mac/Windows run scripts now start without `--reload`, so WatchFiles will not watch `.venv` or restart when pip/site-packages changes.
 - Dev-mode reload scripts are provided separately: `run_mac_linux_dev.sh` and `run_windows_dev.bat`.
@@ -165,7 +165,7 @@ If an older reload server is still running on Mac, stop it first:
 lsof -ti tcp:8000 | xargs kill -9
 ```
 
-## v1.6.5 Mapbox Temporary Geocoding
+## v1.6.6 Mapbox Temporary Geocoding
 
 This build adds Mapbox Temporary Geocoding as the preferred geocoder when configured.
 
@@ -187,20 +187,24 @@ Geocoding order:
 4. Optional legacy public geocoder only when external geocoding is not disabled
 
 
-## v1.6.5 Selected Date Prediction
+## v1.6.6 Selected Date Prediction
 - Adds an optional Prediction Date control in Premium Report Options.
 - Adds a generated section named “Prediction for Selected Date — South Indian Reading”.
 - Uses selected date, Life Path, name vibration, birth place coordinates when available, Nakshatra, Moon Rashi, Tithi and weekday ruler.
 - The selected-date prediction is included in report summary, copy/TXT/PDF/share payloads and metrics.
 
-## v1.6.5 Demo Data and Logo Upload Fix
+## v1.6.6 Demo Data and Logo Upload Fix
 - Demo data creation now self-heals older SQLite/config states and returns partial errors if any sample fails.
 - Admin-uploaded logos are automatically processed as smaller transparent PNG brand assets.
 - Header/admin preview logo display has been reduced so uploaded logos do not dominate the page.
 
 
-## v1.6.5 Demo Data Button Reliability Fix
+## v1.6.6 Demo Data Button Reliability Fix
 
 - Demo data button refreshes the local session/CSRF token before creating data.
 - Demo creation sends JSON with same-origin credentials and retries once if the session token is stale.
 - Demo endpoint rate limit is relaxed for repeated local testing.
+
+## v1.6.6 Language Output Fix
+- Language selection now renders the generated report summary, section titles, section bodies, bullets and full-text export in Kannada, Hindi or Tamil instead of only storing the language preference.
+- Copy, TXT, PDF and saved report payload use the same localized report text.

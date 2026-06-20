@@ -44,7 +44,7 @@ DEFAULT_LOGO_PATH = STATIC_DIR / "logo-life-path-decoder.png"
 
 load_dotenv(PROJECT_DIR / ".env")
 
-APP_VERSION = "1.6.5"
+APP_VERSION = "1.6.6"
 APP_NAME = "Life Path Decoder"
 
 # Railway exposes RAILWAY_PUBLIC_DOMAIN after a public domain is generated.
@@ -1650,6 +1650,233 @@ def _quick_report_summary(report: dict[str, Any], req: AnalyzeRequest) -> dict[s
     return {"title": "Report Summary", "body": body, "bullets": bullets}
 
 
+
+
+LOCALIZED_REPORT_TEXT: dict[str, dict[str, str]] = {
+    "kannada": {
+        "report_title": "ಜೀವನ ಪಥ ವರದಿ",
+        "summary_title": "ವರದಿ ಸಾರಾಂಶ",
+        "summary_body": "{name} ಅವರ ವರದಿ ಜೀವನ ಪಥ {life_path} — {life_title} ಅನ್ನು ಆಧಾರವಾಗಿ ತೆಗೆದುಕೊಂಡಿದೆ. ಹೆಸರು, ಜನ್ಮ ದಿನಾಂಕ, ಜನ್ಮ ಸಮಯ, ಜನ್ಮ ಸ್ಥಳ, ನಕ್ಷತ್ರ, ಚಂದ್ರ ರಾಶಿ, ತಿಥಿ ಮತ್ತು ಪ್ರಸ್ತುತ ವೈಯಕ್ತಿಕ ವರ್ಷದ ಸೂಚನೆಗಳನ್ನು ಸೇರಿಸಿ ಈ ಓದನ್ನು ರೂಪಿಸಲಾಗಿದೆ.",
+        "section_body": "{name} ಅವರ ಈ ವಿಭಾಗವು ಜೀವನ ಪಥ {life_path}, ಹೆಸರು ಸಂಖ್ಯೆ {name_expression}, ಆತ್ಮ ಸಂಖ್ಯೆ {soul_urge}, ನಕ್ಷತ್ರ {nakshatra}, ಚಂದ್ರ ರಾಶಿ {moon_rashi} ಮತ್ತು ವೈಯಕ್ತಿಕ ವರ್ಷ {personal_year} ಆಧಾರವಾಗಿ ಓದಬೇಕು.",
+        "bullet_core": "ಮೂಲ ಸೂಚನೆ: ಜೀವನ ಪಥ {life_path}, ಹೆಸರು ಸಂಖ್ಯೆ {name_expression}, ಆತ್ಮ ಸಂಖ್ಯೆ {soul_urge}, ಜನ್ಮ ದಿನ {birth_day}.",
+        "bullet_south": "ದಕ್ಷಿಣ ಭಾರತೀಯ ಪದರ: ನಕ್ಷತ್ರ {nakshatra}, ಚಂದ್ರ ರಾಶಿ {moon_rashi}, ತಿಥಿ {tithi}, ಸೂರ್ಯ ರಾಶಿ {sun_sign}.",
+        "bullet_name": "ಹೆಸರಿನ ಅರ್ಥ: {name_meaning}; ಸಾಮಾನ್ಯತೆ: {name_commonness}.",
+        "bullet_cycle": "ಪ್ರಸ್ತುತ ಚಕ್ರ: ವೈಯಕ್ತಿಕ ವರ್ಷ {personal_year} — {personal_year_theme}.",
+        "bullet_lucky": "ಶುಭ ಸೂಚನೆಗಳು: ಬಣ್ಣ {lucky_color}, ಹಣ್ಣು {lucky_fruit}, ದಿನ {lucky_day}, ಸಂಖ್ಯೆ {lucky_number}.",
+        "bullet_action": "ಪ್ರಾಯೋಗಿಕ ಕ್ರಮ: {action}",
+        "privacy_saved": "ಗೌಪ್ಯತೆ: ಈ ವರದಿ ಸ್ಥಳೀಯ ಇತಿಹಾಸದಲ್ಲಿ ಉಳಿಯುತ್ತದೆ; History ವಿಭಾಗದಿಂದ ಅಳಿಸಬಹುದು.",
+        "privacy_nostore": "ಗೌಪ್ಯತೆ: No-storage ಆಯ್ಕೆ ಮಾಡಿರುವುದರಿಂದ ಈ ವರದಿ ಸ್ಥಳೀಯ ಇತಿಹಾಸದಲ್ಲಿ ಉಳಿಯುವುದಿಲ್ಲ.",
+        "tiles_note": "ಕೆಳಗಿನ ಟೈಲ್‌ಗಳನ್ನು ತೆರೆಯುವುದರಿಂದ ಪ್ರತಿ ವಿಭಾಗದ ವಿವರವಾದ ಓದು ಕಾಣುತ್ತದೆ.",
+        "today_title": "ಇಂದಿನ ಭವಿಷ್ಯ — ಸ್ಥಳ ಆಧಾರಿತ ಓದು",
+        "date_title": "ಆಯ್ಕೆ ಮಾಡಿದ ದಿನಾಂಕದ ಭವಿಷ್ಯ",
+        "law_title": "ಕಾನೂನು ಸಂಬಂಧಿತ ಎಚ್ಚರಿಕೆ — ದಕ್ಷಿಣ ಭಾರತೀಯ ಓದು",
+        "compat_title": "ಜೋಡಿ ಹೊಂದಾಣಿಕೆ ಅಂಕ",
+        "name_title": "ಹೆಸರು spelling ಮತ್ತು ಶುಭ ಹೆಸರು ಸೂಚನೆಗಳು",
+        "mode_title": "ವರದಿ ವಿಧಾನ ಮತ್ತು ಗೌಪ್ಯತೆ",
+        "disclaimer": "ಹಕ್ಕು ನಿರಾಕರಣೆ: ಇದು ಮನನ/ಮನರಂಜನೆಗಾಗಿ ಮಾತ್ರ. ಇದು ವೈಜ್ಞಾನಿಕ, ವೈದ್ಯಕೀಯ, ಮಾನಸಿಕ, ಕಾನೂನು ಅಥವಾ ಹಣಕಾಸು ಸಲಹೆಯಲ್ಲ.",
+        "themes_default": "ಶಾಂತವಾಗಿ ನಿರ್ಧಾರ ತೆಗೆದುಕೊಳ್ಳಿ, ದಾಖಲಾತಿ ಇಟ್ಟುಕೊಳ್ಳಿ ಮತ್ತು ಅತಿವೇಗದ ಪ್ರತಿಕ್ರಿಯೆಗಳನ್ನು ತಪ್ಪಿಸಿ.",
+        "themes_career": "ಕೆಲಸದಲ್ಲಿ ಶಿಸ್ತು, ಸಂವಹನ ಮತ್ತು ಸಮಯಪಾಲನೆಯನ್ನು ಬಲಪಡಿಸಿ.",
+        "themes_relationship": "ಸಂಬಂಧಗಳಲ್ಲಿ ಸ್ಪಷ್ಟ ಮಾತು, ಸಹನೆ ಮತ್ತು ಗೌರವಪೂರ್ಣ ಮಿತಿಗಳನ್ನು ಪಾಲಿಸಿ.",
+        "themes_wealth": "ಹಣಕಾಸಿನಲ್ಲಿ ದಾಖಲೆ, ಬಜೆಟ್ ಮತ್ತು ದೀರ್ಘಕಾಲದ ದೃಷ್ಟಿಕೋನವನ್ನು ಅನುಸರಿಸಿ.",
+        "themes_law": "ಒಪ್ಪಂದ, ಸಾಲ, ಗ್ಯಾರಂಟಿ, ಸಾಮಾಜಿಕ ಮಾಧ್ಯಮ ಮತ್ತು ಸಾರ್ವಜನಿಕ ವಾದಗಳಲ್ಲಿ ಹೆಚ್ಚು ಎಚ್ಚರಿಕೆ ವಹಿಸಿ.",
+        "themes_date": "ಆ ದಿನದ ಶಕ್ತಿಯನ್ನು ಶಾಂತ ಯೋಜನೆ ಮತ್ತು ಸಮತೋಲನದ ಕ್ರಮಕ್ಕೆ ಬಳಸಿ.",
+    },
+    "hindi": {
+        "report_title": "जीवन पथ रिपोर्ट",
+        "summary_title": "रिपोर्ट सारांश",
+        "summary_body": "{name} की रिपोर्ट जीवन पथ {life_path} — {life_title} पर आधारित है। नाम, जन्म तिथि, जन्म समय, जन्म स्थान, नक्षत्र, चंद्र राशि, तिथि और वर्तमान व्यक्तिगत वर्ष को मिलाकर यह पठन तैयार किया गया है.",
+        "section_body": "{name} के लिए यह भाग जीवन पथ {life_path}, नाम संख्या {name_expression}, आत्म संख्या {soul_urge}, नक्षत्र {nakshatra}, चंद्र राशि {moon_rashi} और व्यक्तिगत वर्ष {personal_year} के आधार पर पढ़ा जाना चाहिए.",
+        "bullet_core": "मुख्य संकेत: जीवन पथ {life_path}, नाम संख्या {name_expression}, आत्म संख्या {soul_urge}, जन्म दिन {birth_day}.",
+        "bullet_south": "दक्षिण भारतीय परत: नक्षत्र {nakshatra}, चंद्र राशि {moon_rashi}, तिथि {tithi}, सूर्य राशि {sun_sign}.",
+        "bullet_name": "नाम का अर्थ: {name_meaning}; सामान्यता: {name_commonness}.",
+        "bullet_cycle": "वर्तमान चक्र: व्यक्तिगत वर्ष {personal_year} — {personal_year_theme}.",
+        "bullet_lucky": "शुभ संकेत: रंग {lucky_color}, फल {lucky_fruit}, दिन {lucky_day}, संख्या {lucky_number}.",
+        "bullet_action": "व्यावहारिक कदम: {action}",
+        "privacy_saved": "गोपनीयता: यह रिपोर्ट स्थानीय इतिहास में सहेजी जाएगी और History से हटाई जा सकती है.",
+        "privacy_nostore": "गोपनीयता: No-storage चुना गया है, इसलिए यह रिपोर्ट स्थानीय इतिहास में सहेजी नहीं जाएगी.",
+        "tiles_note": "नीचे के टाइल खोलने पर हर भाग का विस्तृत पठन दिखेगा.",
+        "today_title": "आज का पूर्वानुमान — स्थान आधारित पठन",
+        "date_title": "चुनी हुई तारीख का पूर्वानुमान",
+        "law_title": "कानूनी सावधानी — दक्षिण भारतीय पठन",
+        "compat_title": "साथी अनुकूलता अंक",
+        "name_title": "नाम spelling और शुभ नाम सुझाव",
+        "mode_title": "रिपोर्ट मोड और गोपनीयता",
+        "disclaimer": "अस्वीकरण: यह केवल चिंतन/मनोरंजन के लिए है। यह वैज्ञानिक, चिकित्सा, मनोवैज्ञानिक, कानूनी या वित्तीय सलाह नहीं है.",
+        "themes_default": "शांत निर्णय लें, रिकॉर्ड रखें और जल्दबाज़ी वाली प्रतिक्रिया से बचें.",
+        "themes_career": "काम में अनुशासन, संवाद और समयपालन को मजबूत करें.",
+        "themes_relationship": "रिश्तों में स्पष्ट बात, धैर्य और सम्मानजनक सीमाएँ रखें.",
+        "themes_wealth": "धन के मामलों में दस्तावेज़, बजट और लंबी सोच अपनाएँ.",
+        "themes_law": "अनुबंध, ऋण, गारंटी, सोशल मीडिया और सार्वजनिक बहस में अधिक सावधानी रखें.",
+        "themes_date": "उस दिन की ऊर्जा को शांत योजना और संतुलित कार्रवाई में लगाएँ.",
+    },
+    "tamil": {
+        "report_title": "வாழ்க்கைப் பாதை அறிக்கை",
+        "summary_title": "அறிக்கை சுருக்கம்",
+        "summary_body": "{name} அவர்களின் அறிக்கை வாழ்க்கைப் பாதை {life_path} — {life_title} என்பதை அடிப்படையாகக் கொண்டது. பெயர், பிறந்த தேதி, பிறந்த நேரம், பிறந்த இடம், நட்சத்திரம், சந்திர ராசி, திதி மற்றும் நடப்பு தனிப்பட்ட ஆண்டை இணைத்து இந்த வாசிப்பு உருவாக்கப்பட்டுள்ளது.",
+        "section_body": "{name} அவர்களுக்கு இந்த பகுதி வாழ்க்கைப் பாதை {life_path}, பெயர் எண் {name_expression}, ஆன்ம எண் {soul_urge}, நட்சத்திரம் {nakshatra}, சந்திர ராசி {moon_rashi} மற்றும் தனிப்பட்ட ஆண்டு {personal_year} அடிப்படையில் வாசிக்கப்பட வேண்டும்.",
+        "bullet_core": "முக்கிய குறிப்பு: வாழ்க்கைப் பாதை {life_path}, பெயர் எண் {name_expression}, ஆன்ம எண் {soul_urge}, பிறந்த நாள் {birth_day}.",
+        "bullet_south": "தென்னிந்திய அடுக்கு: நட்சத்திரம் {nakshatra}, சந்திர ராசி {moon_rashi}, திதி {tithi}, சூரிய ராசி {sun_sign}.",
+        "bullet_name": "பெயரின் பொருள்: {name_meaning}; பொதுவான தன்மை: {name_commonness}.",
+        "bullet_cycle": "தற்போதைய சுழற்சி: தனிப்பட்ட ஆண்டு {personal_year} — {personal_year_theme}.",
+        "bullet_lucky": "அதிர்ஷ்ட குறிகள்: நிறம் {lucky_color}, பழம் {lucky_fruit}, நாள் {lucky_day}, எண் {lucky_number}.",
+        "bullet_action": "நடைமுறை செயல்: {action}",
+        "privacy_saved": "தனியுரிமை: இந்த அறிக்கை உள்ளூர் வரலாற்றில் சேமிக்கப்படும்; History பகுதியில் இருந்து நீக்கலாம்.",
+        "privacy_nostore": "தனியுரிமை: No-storage தேர்வு செய்யப்பட்டதால் இந்த அறிக்கை உள்ளூர் வரலாற்றில் சேமிக்கப்படாது.",
+        "tiles_note": "கீழே உள்ள டைல்களைத் திறந்தால் ஒவ்வொரு பகுதியின் விரிவான வாசிப்பு தெரியும்.",
+        "today_title": "இன்றைய கணிப்பு — இடம் அடிப்படையிலான வாசிப்பு",
+        "date_title": "தேர்ந்தெடுத்த தேதிக்கான கணிப்பு",
+        "law_title": "சட்ட சம்பந்தமான எச்சரிக்கை — தென்னிந்திய வாசிப்பு",
+        "compat_title": "இணை பொருத்த மதிப்பெண்",
+        "name_title": "பெயர் spelling மற்றும் அதிர்ஷ்ட பெயர் பரிந்துரைகள்",
+        "mode_title": "அறிக்கை முறை மற்றும் தனியுரிமை",
+        "disclaimer": "மறுப்பு: இது சிந்தனை/வேடிக்கை பயன்பாட்டிற்காக மட்டுமே. இது அறிவியல், மருத்துவ, உளவியல், சட்ட அல்லது நிதி ஆலோசனை அல்ல.",
+        "themes_default": "அமைதியாக முடிவு எடுக்கவும், பதிவுகளை வைத்திருக்கவும், அவசரமான பதில்களைத் தவிர்க்கவும்.",
+        "themes_career": "வேலையில் ஒழுக்கம், தொடர்பு மற்றும் நேரப்படுத்தலை வலுப்படுத்தவும்.",
+        "themes_relationship": "உறவுகளில் தெளிவான பேச்சு, பொறுமை மற்றும் மரியாதையான எல்லைகளை கடைபிடிக்கவும்.",
+        "themes_wealth": "பண விஷயங்களில் ஆவணம், பட்ஜெட் மற்றும் நீண்டகால பார்வையைப் பின்பற்றவும்.",
+        "themes_law": "ஒப்பந்தம், கடன், உத்தரவாதம், சமூக ஊடகம் மற்றும் பொது விவாதங்களில் அதிக கவனம் தேவை.",
+        "themes_date": "அந்த நாளின் சக்தியை அமைதியான திட்டமிடல் மற்றும் சமநிலையான செயலுக்கு பயன்படுத்தவும்.",
+    },
+}
+
+
+def _localized_terms(req: AnalyzeRequest) -> dict[str, str] | None:
+    lang = (req.output_language or "english").lower().strip()
+    return LOCALIZED_REPORT_TEXT.get(lang)
+
+
+def _section_theme_key(title: str) -> str:
+    t = (title or "").lower()
+    if any(word in t for word in ("career", "professional", "work", "business")):
+        return "themes_career"
+    if any(word in t for word in ("relationship", "partner", "marriage", "love", "compatibility", "children", "family")):
+        return "themes_relationship"
+    if any(word in t for word in ("wealth", "money", "abundance", "finance")):
+        return "themes_wealth"
+    if any(word in t for word in ("law", "caution", "compliance")):
+        return "themes_law"
+    if any(word in t for word in ("today", "date", "prediction", "timeline", "future")):
+        return "themes_date"
+    return "themes_default"
+
+
+def _localized_title(title: str, terms: dict[str, str]) -> str:
+    t = (title or "").lower()
+    if "report mode" in t or "privacy" in t:
+        return terms["mode_title"]
+    if "today" in t:
+        return terms["today_title"]
+    if "selected date" in t or "prediction for" in t:
+        return terms["date_title"]
+    if "law" in t:
+        return terms["law_title"]
+    if "compatibility" in t or "partner" in t:
+        return terms["compat_title"]
+    if "name spelling" in t or "lucky name" in t:
+        return terms["name_title"]
+    # Add a readable target-language prefix so even uncommon generated section names appear localized.
+    lang_title_prefix = {
+        "kannada": "ವಿಭಾಗ",
+        "hindi": "भाग",
+        "tamil": "பகுதி",
+    }
+    for lang, meta in LOCALIZED_REPORT_TEXT.items():
+        if terms is meta:
+            return f"{lang_title_prefix.get(lang, '')}: {title}".strip()
+    return title
+
+
+def _localized_context(report: dict[str, Any], req: AnalyzeRequest) -> dict[str, Any]:
+    calc = report.get("calculations", {}) or {}
+    input_data = report.get("input", {}) or {}
+    return {
+        "name": str(input_data.get("name") or req.name or "Profile"),
+        "dob": str(input_data.get("dob") or req.date_of_birth or "-"),
+        "birth_place": str(input_data.get("birth_place") or req.birth_place or "-"),
+        "birth_time": str(input_data.get("birth_time") or req.birth_time or "-"),
+        "life_path": calc.get("life_path", "-"),
+        "life_title": calc.get("life_path_title") or "core pattern",
+        "name_expression": calc.get("name_expression", "-"),
+        "soul_urge": calc.get("soul_urge", "-"),
+        "birth_day": calc.get("birth_day", "-"),
+        "nakshatra": calc.get("nakshatra") or "-",
+        "moon_rashi": calc.get("moon_rashi") or "-",
+        "tithi": calc.get("tithi") or "-",
+        "sun_sign": calc.get("sun_sign") or "-",
+        "personal_year": calc.get("personal_year", "-"),
+        "personal_year_theme": calc.get("personal_year_theme") or "-",
+        "name_meaning": calc.get("name_meaning") or "-",
+        "name_commonness": calc.get("name_commonness") or "-",
+        "lucky_color": calc.get("lucky_color") or "-",
+        "lucky_fruit": calc.get("lucky_fruit") or "-",
+        "lucky_day": calc.get("lucky_day") or "-",
+        "lucky_number": calc.get("lucky_number") or "-",
+    }
+
+
+def _localized_summary(report: dict[str, Any], req: AnalyzeRequest) -> dict[str, Any]:
+    terms = _localized_terms(req)
+    if not terms:
+        return _quick_report_summary(report, req)
+    ctx = _localized_context(report, req)
+    bullets = [
+        terms["bullet_core"].format(**ctx),
+        terms["bullet_south"].format(**ctx),
+        terms["bullet_name"].format(**ctx),
+        terms["bullet_cycle"].format(**ctx),
+        terms["bullet_lucky"].format(**ctx),
+        terms["tiles_note"],
+        terms["privacy_nostore"] if req.no_storage else terms["privacy_saved"],
+    ]
+    today_prediction = report.get("report", {}).get("today_prediction") if isinstance(report.get("report", {}).get("today_prediction"), dict) else None
+    if today_prediction:
+        bullets.insert(5, terms["bullet_action"].format(action=f"{today_prediction.get('focus', 'steady action')} / avoid {today_prediction.get('avoid', 'rushed judgement')}"))
+    given_prediction = report.get("report", {}).get("given_date_prediction") if isinstance(report.get("report", {}).get("given_date_prediction"), dict) else None
+    if given_prediction:
+        bullets.insert(5, terms["bullet_action"].format(action=f"{given_prediction.get('date_label', 'selected date')}: {given_prediction.get('focus', 'steady action')}"))
+    return {
+        "title": terms["summary_title"],
+        "body": terms["summary_body"].format(**ctx),
+        "bullets": bullets,
+    }
+
+
+def _localize_report_sections(report: dict[str, Any], req: AnalyzeRequest, sections: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    terms = _localized_terms(req)
+    if not terms:
+        return sections
+    ctx = _localized_context(report, req)
+    localized: list[dict[str, Any]] = []
+    for sec in sections:
+        title = str(sec.get("title") or "")
+        theme_action = terms[_section_theme_key(title)]
+        body = terms["section_body"].format(**ctx)
+        bullets = [
+            terms["bullet_core"].format(**ctx),
+            terms["bullet_south"].format(**ctx),
+            terms["bullet_action"].format(action=theme_action),
+            terms["bullet_lucky"].format(**ctx),
+        ]
+        # Preserve important numeric/data points from specialized sections while keeping the surrounding text native.
+        if "compatibility" in title.lower() or "partner" in title.lower():
+            bullets.append(terms["bullet_action"].format(action=f"{req.partner_name or 'Partner'} — compatibility details are based on both dates and names."))
+        if "today" in title.lower():
+            tp = report.get("report", {}).get("today_prediction") or {}
+            if isinstance(tp, dict):
+                bullets.append(terms["bullet_action"].format(action=f"{tp.get('location_label', '-')}: focus {tp.get('focus', '-')}; avoid {tp.get('avoid', '-')}"))
+        if "selected date" in title.lower() or "prediction for" in title.lower():
+            gp = report.get("report", {}).get("given_date_prediction") or {}
+            if isinstance(gp, dict):
+                bullets.append(terms["bullet_action"].format(action=f"{gp.get('date_label', '-')}: {gp.get('focus', '-')}"))
+        localized.append({
+            "title": _localized_title(title, terms),
+            "body": body,
+            "bullets": bullets,
+            "table": sec.get("table", []),
+        })
+    report["report"]["title"] = terms["report_title"]
+    return localized
+
 def enhance_report(report: dict[str, Any], req: AnalyzeRequest, request: Request | None = None) -> dict[str, Any]:
     calc = report.get("calculations", {})
     input_data = report.get("input", {})
@@ -1668,12 +1895,6 @@ def enhance_report(report: dict[str, Any], req: AnalyzeRequest, request: Request
     if given_date_section:
         sections.insert(2, given_date_section)
 
-    if req.output_language != "english":
-        sections.insert(1, _section(
-            f"{req.output_language.title()} Output Note",
-            "This build stores the selected language preference and labels the report for that language. Full native-language rendering can be connected to a translation layer in the next production release.",
-            bullets=["The current report remains in English for accuracy and consistency.", "Language preference is carried in the report payload for future translation/export."],
-        ))
 
     if req.brutal_mode or req.tone == "brutally_honest":
         sections.insert(2, _section(
@@ -1727,8 +1948,9 @@ def enhance_report(report: dict[str, Any], req: AnalyzeRequest, request: Request
     if not any(str(sec.get("title", "")).startswith("Trouble With Law") for sec in sections):
         sections.append(_law_caution_section(report))
 
+    sections = _localize_report_sections(report, req, sections)
     report["report"]["sections"] = sections
-    quick_summary = _quick_report_summary(report, req)
+    quick_summary = _localized_summary(report, req)
     report["report"]["quick_summary"] = quick_summary
     report["input"].update({
         "report_length": req.report_length,
@@ -1757,7 +1979,8 @@ def enhance_report(report: dict[str, Any], req: AnalyzeRequest, request: Request
         for row in sec.get("table", []) or []:
             lines.append("- " + " | ".join(str(v) for v in row.values()))
         lines.append("")
-    lines.append("Disclaimer: Reflective/entertainment use only. Not scientific, medical, psychological, legal or financial advice.")
+    terms_for_text = _localized_terms(req)
+    lines.append(terms_for_text["disclaimer"] if terms_for_text else "Disclaimer: Reflective/entertainment use only. Not scientific, medical, psychological, legal or financial advice.")
     report["report"]["full_text"] = "\n".join(lines).strip()
     return report
 
@@ -1949,9 +2172,9 @@ def report_pdf_bytes(report: dict[str, Any]) -> bytes:
     W, H = 1240, 1754
     margin = 90
     pages = []
-    font_title = _load_font(46, True)
-    font_body = _load_font(26, False)
-    font_footer = _load_font(20, False)
+    font_title = _load_font(46, True, full_text)
+    font_body = _load_font(26, False, full_text)
+    font_footer = _load_font(20, False, full_text)
     line_h = 36
     max_chars = 82
     lines = []
@@ -1972,7 +2195,7 @@ def report_pdf_bytes(report: dict[str, Any]) -> bytes:
         while idx < len(lines) and y < H - 120:
             line = lines[idx]
             if line and not line.startswith("- ") and len(line) < 72 and idx + 1 < len(lines) and lines[idx + 1] != "":
-                draw.text((margin, y), line, font=_load_font(30, True), fill=(70, 48, 130))
+                draw.text((margin, y), line, font=_load_font(30, True, full_text), fill=(70, 48, 130))
                 y += 44
             else:
                 draw.text((margin, y), line, font=font_body, fill=(30, 30, 45))
@@ -2087,10 +2310,24 @@ def public_share_html(token: str, row: sqlite3.Row) -> str:
 </html>"""
 
 
-def _load_font(size: int, bold: bool = False):
+def _load_font(size: int, bold: bool = False, sample_text: str = ""):
     if ImageFont is None:
         return None
-    candidates = [
+
+    sample = sample_text or ""
+    has_kannada = any("\u0C80" <= ch <= "\u0CFF" for ch in sample)
+    has_devanagari = any("\u0900" <= ch <= "\u097F" for ch in sample)
+    has_tamil = any("\u0B80" <= ch <= "\u0BFF" for ch in sample)
+
+    script_candidates: list[str] = []
+    if has_kannada:
+        script_candidates.append("/usr/share/fonts/truetype/noto/NotoSansKannada-Bold.ttf" if bold else "/usr/share/fonts/truetype/noto/NotoSansKannada-Regular.ttf")
+    if has_devanagari:
+        script_candidates.append("/usr/share/fonts/truetype/noto/NotoSansDevanagari-Bold.ttf" if bold else "/usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf")
+    if has_tamil:
+        script_candidates.append("/usr/share/fonts/truetype/noto/NotoSansTamil-Bold.ttf" if bold else "/usr/share/fonts/truetype/noto/NotoSansTamil-Regular.ttf")
+
+    candidates = script_candidates + [
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
         "/System/Library/Fonts/Supplemental/Arial Bold.ttf" if bold else "/System/Library/Fonts/Supplemental/Arial.ttf",
         "C:/Windows/Fonts/arialbd.ttf" if bold else "C:/Windows/Fonts/arial.ttf",
