@@ -492,6 +492,28 @@ function renderReport(data) {
   result.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+function applyClientGeocodeFallback(birthPlace, reason = 'Local browser fallback') {
+  // Final safety net: do not block report generation if the server geocoder
+  // cannot be reached. The backend also has this soft fallback, but this keeps
+  // the UI pleasant during stale sessions or temporary network errors.
+  const lat = 21.1458;
+  const lon = 79.088155;
+  geocodeResult = {
+    birth_place: birthPlace,
+    display_name: `${birthPlace} (approximate India fallback)`,
+    latitude: lat,
+    longitude: lon,
+    source: `${reason}; exact place not resolved`,
+    resolved: true,
+    approximate: true,
+  };
+  lastGeocodedPlace = birthPlace;
+  el('latitude').value = lat;
+  el('longitude').value = lon;
+  el('geoStatus').textContent = `Using approximate fallback for report generation: ${lat.toFixed(6)}, ${lon.toFixed(6)}. Enter exact coordinates for precision.`;
+  return geocodeResult;
+}
+
 async function geocodePlace({ showErrors = false, force = false } = {}) {
   if (geocodeInProgress) return geocodeResult;
   clearError();
@@ -522,27 +544,42 @@ async function geocodePlace({ showErrors = false, force = false } = {}) {
   el('longitude').value = '';
 
   try {
-    const res = await fetch('/api/geocode', {
+    if (!csrfToken) await refreshLocalSession();
+    let res = await fetch('/api/geocode', {
       method: 'POST',
-      headers: authHeaders(),
+      credentials: 'same-origin',
+      headers: { ...authHeaders(), 'Accept': 'application/json' },
       body: JSON.stringify({ birth_place: birthPlace }),
     });
-    const data = await res.json();
+    if (res.status === 403) {
+      await refreshLocalSession();
+      res = await fetch('/api/geocode', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { ...authHeaders(), 'Accept': 'application/json' },
+        body: JSON.stringify({ birth_place: birthPlace }),
+      });
+    }
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.detail || 'Unable to find latitude and longitude.');
     geocodeResult = data;
     lastGeocodedPlace = birthPlace;
-    if (data.resolved) {
+    if (data.resolved && data.latitude !== null && data.longitude !== null) {
       el('latitude').value = data.latitude;
       el('longitude').value = data.longitude;
-      el('geoStatus').textContent = `Resolved automatically: ${data.display_name} → ${Number(data.latitude).toFixed(6)}, ${Number(data.longitude).toFixed(6)} (${data.source})`;
+      const prefix = data.approximate ? 'Resolved with approximate fallback' : 'Resolved automatically';
+      el('geoStatus').textContent = `${prefix}: ${data.display_name} → ${Number(data.latitude).toFixed(6)}, ${Number(data.longitude).toFixed(6)} (${data.source})`;
     } else {
-      el('geoStatus').textContent = `Auto-resolve incomplete: ${data.source}`;
+      applyClientGeocodeFallback(birthPlace, data.source || 'Server could not resolve exact place');
     }
-    return data;
+    return geocodeResult;
   } catch (err) {
-    el('geoStatus').textContent = 'Could not auto-resolve. Check spelling or use a larger city/state/country.';
-    if (showErrors) showError(err.message || 'Unable to find latitude and longitude.');
-    return null;
+    const fallback = applyClientGeocodeFallback(birthPlace, err.message || 'Geocoder temporarily unavailable');
+    if (showErrors) {
+      // Keep the report usable; surface a note rather than a blocking error.
+      clearError();
+    }
+    return fallback;
   } finally {
     geocodeInProgress = false;
   }

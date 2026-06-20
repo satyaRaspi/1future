@@ -44,7 +44,7 @@ DEFAULT_LOGO_PATH = STATIC_DIR / "logo-life-path-decoder.png"
 
 load_dotenv(PROJECT_DIR / ".env")
 
-APP_VERSION = "1.6.6"
+APP_VERSION = "1.6.7"
 APP_NAME = "Life Path Decoder"
 
 # Railway exposes RAILWAY_PUBLIC_DOMAIN after a public domain is generated.
@@ -498,7 +498,7 @@ class AnalyzeRequest(BaseModel):
     def clean_optional_place(cls, value: Optional[str]) -> Optional[str]:
         if value is None or not str(value).strip():
             return None
-        return _clean_text(str(value), "Birth place")
+        return _clean_place_text(str(value), "Birth place")
 
     @field_validator("date_of_birth")
     @classmethod
@@ -579,7 +579,7 @@ class GeocodeRequest(BaseModel):
     @field_validator("birth_place")
     @classmethod
     def clean_place(cls, value: str) -> str:
-        return _clean_text(value, "Birth place")
+        return _clean_place_text(value, "Birth place")
 
 
 class LogoutRequest(BaseModel):
@@ -606,6 +606,21 @@ def _clean_text(value: str, label: str) -> str:
     if not SAFE_TEXT.match(clean):
         raise ValueError(f"{label} contains unsupported characters.")
     return clean
+
+
+def _clean_place_text(value: str, label: str) -> str:
+    """Cleaner for address/place fields.
+
+    Place names often include #, :, +, and other harmless address characters.
+    Reject only control characters and angle brackets while keeping enough
+    flexibility for Indian addresses, PINs, coordinates and locality names.
+    """
+    clean = " ".join((value or "").strip().split())
+    if CONTROL_CHARS.search(clean):
+        raise ValueError(f"{label} contains invalid control characters.")
+    if "<" in clean or ">" in clean:
+        raise ValueError(f"{label} contains unsupported characters.")
+    return clean[:180]
 
 
 def _now_iso() -> str:
@@ -902,8 +917,45 @@ def _local_geocode_lookup(clean: str) -> tuple[float, float, str, str] | None:
     return None
 
 
+def _geocode_soft_fallback(clean: str, reason: str) -> dict[str, Any]:
+    """Return a non-blocking approximate location instead of failing.
+
+    Life Path Decoder should never prevent a report merely because a deployment
+    cannot reach an external geocoder or an obscure locality is missing from the
+    offline table. The source text clearly marks this as approximate so the user
+    can manually enter exact coordinates if precision is important.
+    """
+    key = _normalise_place(clean)
+    padded = f" {key} "
+
+    for state in sorted(STATE_COORDINATE_FALLBACKS.keys(), key=len, reverse=True):
+        if f" {state} " in padded:
+            lat, lon, source = STATE_COORDINATE_FALLBACKS[state]
+            return {
+                "birth_place": clean,
+                "display_name": f"{clean} (approximate {state.title()} fallback)",
+                "latitude": lat,
+                "longitude": lon,
+                "source": f"{source} · soft fallback · {reason}",
+                "resolved": True,
+                "approximate": True,
+            }
+
+    # India is the default commercial target geography for this build. Unknown
+    # places still get a usable geographic anchor and do not block the report.
+    return {
+        "birth_place": clean,
+        "display_name": f"{clean} (approximate India fallback)",
+        "latitude": 21.145800,
+        "longitude": 79.088155,
+        "source": f"Approximate country fallback: India centre · soft fallback · {reason}",
+        "resolved": True,
+        "approximate": True,
+    }
+
+
 def geocode_place(place: str) -> dict[str, Any]:
-    clean = _clean_text(place, "Birth place")
+    clean = _clean_place_text(place, "Birth place")
     if len(clean) < 2:
         raise ValueError("Birth place is required for latitude/longitude lookup.")
 
@@ -943,37 +995,25 @@ def geocode_place(place: str) -> dict[str, Any]:
         }
 
     if use_mapbox and not MAPBOX_ACCESS_TOKEN and GEOCODER_PROVIDER in {"mapbox", "mapbox_temporary", "mapbox-temporary"}:
-        return {
-            "birth_place": clean,
-            "display_name": clean,
-            "latitude": None,
-            "longitude": None,
-            "source": "Mapbox selected but MAPBOX_ACCESS_TOKEN is not configured. Enter coordinates or configure the token in Railway.",
-            "resolved": False,
-        }
+        return _geocode_soft_fallback(
+            clean,
+            "Mapbox selected but MAPBOX_ACCESS_TOKEN is not configured; using safe approximate fallback so report generation can continue.",
+        )
 
     if use_mapbox and mapbox_error and GEOCODER_PROVIDER in {"mapbox", "mapbox_temporary", "mapbox-temporary"}:
-        return {
-            "birth_place": clean,
-            "display_name": clean,
-            "latitude": None,
-            "longitude": None,
-            "source": f"{mapbox_error} Offline database also did not match. Try city, state, country or coordinates like 12.9716, 77.5946.",
-            "resolved": False,
-        }
+        return _geocode_soft_fallback(
+            clean,
+            f"{mapbox_error} Offline database also did not match; using safe approximate fallback so report generation can continue.",
+        )
 
     # Optional legacy public geocoder fallback. For production, prefer Mapbox
     # with MAPBOX_ACCESS_TOKEN and keep DISABLE_EXTERNAL_GEOCODING=true if you
     # want to avoid public Nominatim entirely.
     if os.getenv("DISABLE_EXTERNAL_GEOCODING", "false").strip().lower() in {"1", "true", "yes", "on"}:
-        return {
-            "birth_place": clean,
-            "display_name": clean,
-            "latitude": None,
-            "longitude": None,
-            "source": "Not resolved in Mapbox/offline database. Try city, state, country or coordinates.",
-            "resolved": False,
-        }
+        return _geocode_soft_fallback(
+            clean,
+            "External geocoding disabled and offline database did not match; using safe approximate fallback so report generation can continue.",
+        )
 
     query = urlencode({"q": clean, "format": "json", "limit": "1", "addressdetails": "0"})
     url = f"https://nominatim.openstreetmap.org/search?{query}"
@@ -986,24 +1026,16 @@ def geocode_place(place: str) -> dict[str, Any]:
         with urlopen(req, timeout=8) as response:
             payload = json.loads(response.read().decode("utf-8"))
     except Exception as exc:
-        return {
-            "birth_place": clean,
-            "display_name": clean,
-            "latitude": None,
-            "longitude": None,
-            "source": f"Mapbox not configured/resolved, offline database did not match, and legacy external geocoder failed ({type(exc).__name__}). Enter coordinates like 12.9716, 77.5946.",
-            "resolved": False,
-        }
+        return _geocode_soft_fallback(
+            clean,
+            f"Mapbox not configured/resolved, offline database did not match, and legacy external geocoder failed ({type(exc).__name__}); using safe approximate fallback.",
+        )
 
     if not payload:
-        return {
-            "birth_place": clean,
-            "display_name": clean,
-            "latitude": None,
-            "longitude": None,
-            "source": "No matching place found in Mapbox, legacy geocoder, or offline city database.",
-            "resolved": False,
-        }
+        return _geocode_soft_fallback(
+            clean,
+            "No exact matching place found in Mapbox, legacy geocoder, or offline city database; using safe approximate fallback.",
+        )
 
     first = payload[0]
     return {
@@ -1057,6 +1089,7 @@ def _public_payload(report: dict[str, Any]) -> dict[str, Any]:
 
 
 def create_shared_report(user_id: int, report: dict[str, Any]) -> dict[str, str]:
+    init_db()
     token = make_public_token()
     public_payload = _public_payload(report)
     now = datetime.now(timezone.utc)
@@ -1988,6 +2021,7 @@ def enhance_report(report: dict[str, Any], req: AnalyzeRequest, request: Request
 def save_report_history(user_id: int, req: AnalyzeRequest, report: dict[str, Any]) -> int | None:
     if req.no_storage:
         return None
+    init_db()
     with get_db() as conn:
         cur = conn.execute(
             """
