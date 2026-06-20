@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Life Path Decoder</title>
+  <link rel="icon" type="image/png" href="/static/favicon.png" />
+  <link rel="stylesheet" href="/static/styles.css?v=1.6.5" />
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="topbar">
+        <div class="brand-row brand-row-with-logo">
+          <div class="brand-logo-card" aria-label="Life Path Decoder logo">
+            <img src="/brand/logo?v=1.6.5" alt="Life Path Decoder — Shockingly Accurate" class="brand-logo-img" />
+          </div>
+          <div class="brand-copy">
+            <div class="eyebrow">Shockingly Accurate</div>
+            <h1>Life Path Decoder</h1>
+          </div>
+        </div>
+      </div>
+      <p class="hero-text">
+        Select a report tile, enter name, date of birth, time of birth and birth place, then generate a structured report using
+        numerology-style logic, psychology-inspired patterning, South Indian prediction logic and life-stage interpretation.
+      </p>
+      <div class="notice">
+        For reflection and entertainment only. This is not a scientific, medical, psychological, legal, financial or deterministic assessment.
+      </div>
+    </section>
+
+
+    <section id="error" class="error hidden"></section>
+
+    <section id="appScreen" class="hidden">
+      <section class="card input-card">
+        <form id="decoderForm">
+          <div class="section-heading details-heading first-details-heading">
+            <div>
+              <div class="eyebrow">Step 1</div>
+              <h2>Enter birth details</h2>
+            </div>
+          </div>
+
+          <div class="field-grid">
+            <label>
+              <span>Name</span>
+              <input id="name" name="name" type="text" placeholder="Enter full name" required maxlength="120" autocomplete="name" />
+            </label>
+            <label class="dob-friendly-field">
+              <span>Date of Birth</span>
+              <input id="dob" name="dob" type="hidden" required />
+              <div class="dob-control" data-target="dob">
+                <select id="dobDay" aria-label="Birth day"></select>
+                <select id="dobMonth" aria-label="Birth month"></select>
+                <select id="dobYear" aria-label="Birth year"></select>
+              </div>
+              <small id="dobHelper" class="field-helper">Select day, month and year.</small>
+            </label>
+            <label>
+              <span>Time of Birth</span>
+              <input id="birthTime" name="birthTime" type="time" />
+            </label>
+            <label class="wide">
+              <span>Birth Place</span>
+              <input id="birthPlace" name="birthPlace" type="text" placeholder="Example: Bengaluru, Karnataka, India" maxlength="180" autocomplete="off" />
+            </label>
+          </div>
+
+          <div class="geo-row auto-geo-row">
+            <div id="geoStatus" class="geo-status">Enter birth place to auto-resolve latitude and longitude.</div>
+          </div>
+
+          <input id="latitude" type="hidden" />
+          <input id="longitude" type="hidden" />
+
+          <div class="section-heading report-mode-heading">
+            <div>
+              <div class="eyebrow">Step 2</div>
+              <h2>Choose the report tile</h2>
+            </div>
+            <span id="selectedBadge" class="badge">The Decoder of the Life Path</span>
+          </div>
+
+          <div id="promptTiles" class="tile-grid" aria-label="Report options"></div>
+
+          <div class="section-heading report-options-heading">
+            <div>
+              <div class="eyebrow">Step 3</div>
+              <h2>Premium report options</h2>
+            </div>
+          </div>
+
+          <div class="field-grid options-grid">
+            <label>
+              <span>Report Length</span>
+              <select id="reportLength">
+                <option value="short">Short</option>
+                <option value="medium">Medium</option>
+                <option value="detailed" selected>Detailed</option>
+              </select>
+            </label>
+            <label>
+              <span>Tone</span>
+              <select id="tone">
+                <option value="balanced" selected>Balanced</option>
+                <option value="positive">Positive</option>
+                <option value="direct">Direct</option>
+                <option value="brutally_honest">Brutally Honest</option>
+              </select>
+            </label>
+            <label>
+              <span>Language</span>
+              <select id="outputLanguage">
+                <option value="english" selected>English</option>
+                <option value="kannada">Kannada</option>
+                <option value="hindi">Hindi</option>
+                <option value="tamil">Tamil</option>
+              </select>
+            </label>
+            <label class="dob-friendly-field">
+              <span>Prediction Date</span>
+              <input id="predictionDate" type="hidden" />
+              <div class="dob-control" data-target="predictionDate">
+                <select id="predictionDateDay" aria-label="Prediction day"></select>
+                <select id="predictionDateMonth" aria-label="Prediction month"></select>
+                <select id="predictionDateYear" aria-label="Prediction year"></select>
+              </div>
+              <small id="predictionDateHelper" class="field-helper">Optional. Select a date to add a dedicated prediction section.</small>
+            </label>
+            <label class="check-label">
+              <span>No Storage Mode</span>
+              <input id="noStorage" type="checkbox" />
+            </label>
+          </div>
+
+          <div class="section-heading compatibility-heading">
+            <div>
+              <div class="eyebrow">Optional</div>
+              <h2>Partner compatibility inputs</h2>
+            </div>
+          </div>
+          <div class="field-grid partner-grid">
+            <label>
+              <span>Partner Name</span>
+              <input id="partnerName" type="text" placeholder="Optional" maxlength="120" />
+            </label>
+            <label class="dob-friendly-field">
+              <span>Partner DOB</span>
+              <input id="partnerDob" type="hidden" />
+              <div class="dob-control" data-target="partnerDob">
+                <select id="partnerDobDay" aria-label="Partner birth day"></select>
+                <select id="partnerDobMonth" aria-label="Partner birth month"></select>
+                <select id="partnerDobYear" aria-label="Partner birth year"></select>
+              </div>
+              <small id="partnerDobHelper" class="field-helper">Optional. Select only when required.</small>
+            </label>
+            <label>
+              <span>Partner Time</span>
+              <input id="partnerBirthTime" type="time" />
+            </label>
+            <label class="wide">
+              <span>Partner Birth Place</span>
+              <input id="partnerBirthPlace" type="text" placeholder="Optional" maxlength="180" />
+            </label>
+          </div>
+
+          <div class="actions">
+            <button class="primary" type="submit">Generate Selected Report</button>
+            <button class="secondary" type="button" id="sampleBtn">Use Sample</button>
+            <button class="secondary hidden" type="button" id="demoDataBtn">Create Demo Data</button>
+            <button class="ghost" type="button" id="clearBtn">Clear</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="loading" class="card loading hidden">
+        <div class="spinner"></div>
+        <div>Generating the selected report...</div>
+      </section>
+
+      <section id="result" class="result hidden">
+        <div class="result-header">
+          <div>
+            <div class="eyebrow">Generated Report</div>
+            <h2 id="resultTitle">Life Path Report</h2>
+            <p id="resultSub" class="subtle"></p>
+          </div>
+          <div class="result-actions">
+            <button class="secondary" id="copyBtn" type="button">Copy Report</button>
+            <button class="secondary" id="downloadBtn" type="button">Download TXT</button>
+            <button class="secondary" id="pdfBtn" type="button">Download PDF</button>
+            <button class="primary" id="printBtn" type="button">Print / Save PDF</button>
+          </div>
+        </div>
+
+        <div class="metrics" id="metrics"></div>
+        <div id="reportSummary" class="report-summary hidden"></div>
+        <div class="section-tile-help subtle">Click any section tile to open its full details.</div>
+        <div id="dynamicSections" class="dynamic-sections section-tile-grid"></div>
+
+        <div class="card share-card">
+          <div>
+            <div class="eyebrow">Public Sharing</div>
+            <h2>Create public result URL and social cards</h2>
+            <p class="subtle">Create a shareable result page with Open Graph tags for Facebook and downloadable Instagram carousel cards.</p>
+          </div>
+          <div class="share-actions">
+            <button id="createShareBtn" class="primary" type="button">Create Public Share Link</button>
+            <a id="facebookBtn" class="secondary link-button hidden" href="#" target="_blank" rel="noopener noreferrer">Share on Facebook</a>
+            <a id="whatsappBtn" class="secondary link-button hidden" href="#" target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
+            <a id="instagramBtn" class="secondary link-button hidden" href="#">Instagram Carousel</a>
+            <a id="storyBtn" class="secondary link-button hidden" href="#">Instagram Story</a>
+            <a id="socialCardsBtn" class="secondary link-button hidden" href="#">Social Cards</a>
+          </div>
+          <div id="sharePanel" class="share-panel hidden">
+            <label>
+              <span>Public URL</span>
+              <input id="shareUrl" type="text" readonly />
+            </label>
+            <button id="copyShareBtn" class="secondary" type="button">Copy Public URL</button>
+            <p id="shareNote" class="subtle"></p>
+          </div>
+        </div>
+
+        <div class="card share-card history-card">
+          <div>
+            <div class="eyebrow">History, Privacy & Admin</div>
+            <h2>Saved reports and configuration</h2>
+            <p class="subtle">View saved reports, clear local history, or keep report storage private.</p>
+          </div>
+          <div class="share-actions">
+            <button id="loadHistoryBtn" class="secondary" type="button">Load History</button>
+            <button id="clearHistoryBtn" class="ghost" type="button">Clear History</button>
+          </div>
+          <div id="historyPanel" class="history-panel subtle"></div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+
+  <div id="sectionModal" class="section-modal hidden" role="dialog" aria-modal="true" aria-labelledby="sectionModalTitle">
+    <div class="section-modal-backdrop" id="sectionModalBackdrop"></div>
+    <div class="section-modal-card card" role="document">
+      <div class="section-modal-header">
+        <div>
+          <div id="sectionModalCount" class="eyebrow">Report Section</div>
+          <h2 id="sectionModalTitle">Section Details</h2>
+        </div>
+        <button id="sectionModalClose" class="modal-close" type="button" aria-label="Close section details">×</button>
+      </div>
+      <div id="sectionModalBody" class="section-modal-body"></div>
+      <div class="section-modal-footer">
+        <button id="sectionPrevBtn" class="secondary" type="button">Previous</button>
+        <button id="sectionNextBtn" class="primary" type="button">Next</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="adminLoginModal" class="section-modal hidden" role="dialog" aria-modal="true" aria-labelledby="adminLoginTitle">
+    <div class="section-modal-backdrop" id="adminLoginBackdrop"></div>
+    <div class="section-modal-card card admin-login-card" role="document">
+      <div class="section-modal-header">
+        <div>
+          <div class="eyebrow">Admin Access</div>
+          <h2 id="adminLoginTitle">Admin Settings Login</h2>
+        </div>
+        <button id="adminLoginClose" class="modal-close" type="button" aria-label="Close admin login">×</button>
+      </div>
+      <div class="section-modal-body">
+        <div id="adminLoginError" class="error hidden"></div>
+        <div class="field-grid">
+          <label class="wide">
+            <span>Admin ID</span>
+            <input id="adminLoginId" type="text" placeholder="Enter admin ID" autocomplete="username" />
+          </label>
+          <label class="wide">
+            <span>Password</span>
+            <input id="adminLoginPassword" type="password" placeholder="Enter password" autocomplete="current-password" />
+          </label>
+        </div>
+        <p class="subtle">Admin settings open only after this login is verified for the current session.</p>
+      </div>
+      <div class="section-modal-footer">
+        <button id="adminLoginCancel" class="secondary" type="button">Cancel</button>
+        <button id="adminLoginSubmit" class="primary" type="button">Open Admin Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>Life Path Decoder v1.6.5</span>
+    <a href="#" id="adminFooterLoginBtn">Admin Login</a>
+  </footer>
+
+  <script src="/static/app.js?v=1.6.5"></script>
+</body>
+</html>

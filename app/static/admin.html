@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Life Path Decoder Admin</title>
+  <link rel="stylesheet" href="/static/styles.css?v=1.6.4" />
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="eyebrow">Admin Configuration</div>
+      <h1>Life Path Decoder Settings</h1>
+      <p class="hero-text">Configure commercial settings, pricing labels, privacy defaults, enabled features and the public logo for the prototype.</p>
+      <div class="actions"><a class="secondary link-button" href="/">Back to App</a></div>
+    </section>
+
+    <section class="card input-card">
+      <div id="adminError" class="error hidden"></div>
+      <div class="admin-logo-panel">
+        <div>
+          <div class="eyebrow">Logo Configuration</div>
+          <h2>App Logo</h2>
+          <p class="subtle">Upload a PNG, JPG, JPEG or WEBP logo. The selected logo will appear on the homepage, public share pages and footer-linked app views.</p>
+          <div class="actions">
+            <input id="logoFile" type="file" accept="image/png,image/jpeg,image/webp" />
+            <button id="uploadLogoBtn" class="primary" type="button">Upload Logo</button>
+            <button id="resetLogoBtn" class="secondary" type="button">Reset Default Logo</button>
+          </div>
+        </div>
+        <div class="admin-logo-preview-card">
+          <span class="subtle">Current Logo</span>
+          <img id="logoPreview" src="/brand/logo" alt="Current Life Path Decoder logo" />
+        </div>
+      </div>
+      <div class="field-grid">
+        <label class="wide">
+          <span>Brand Tagline</span>
+          <input id="brandTagline" type="text" placeholder="Shockingly Accurate" />
+        </label>
+        <label>
+          <span>Free Plan Label</span>
+          <input id="freePlan" type="text" />
+        </label>
+        <label>
+          <span>Premium Plan Label</span>
+          <input id="premiumPlan" type="text" />
+        </label>
+        <label>
+          <span>Compatibility Plan Label</span>
+          <input id="compatPlan" type="text" />
+        </label>
+        <label class="check-label">
+          <span>Show Create Demo Data Button</span>
+          <input id="demoDataVisible" type="checkbox" />
+        </label>
+      </div>
+      <div class="actions">
+        <button id="loadConfigBtn" class="secondary" type="button">Load Config</button>
+        <button id="saveConfigBtn" class="primary" type="button">Save Config</button>
+      </div>
+      <pre id="configPreview" class="setup-box"></pre>
+    </section>
+  </main>
+  <footer><span>Life Path Decoder v1.5.5</span></footer>
+  <script src="/static/admin.js?v=1.6.4" defer></script>
+
+</body>
+</html>
